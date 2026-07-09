@@ -464,6 +464,10 @@ handle_common_editor_action :: (action: Action_Editors, placement: Editor_Placem
         // TODO: search_in_buffer
         case .search_in_project;
             if active_global_widget == .editors then finder_open_from_editor(); else finder_open();                 return true;
+
+        case .go_to_jai_definition;
+            if active_global_widget == .editors then finder_go_to_jai_definition_from_editor();
+            return true;
     }
     return false;
 }

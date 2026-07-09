@@ -53,6 +53,7 @@ ACTIONS_COMMON :: string.[
     "search_in_buffer",
     "search_in_buffer_dropdown_mode",
     "search_in_project",
+    "go_to_jai_definition",
     "go_to_line",
 
     "open_file_by_name",
