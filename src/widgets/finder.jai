@@ -96,10 +96,6 @@ finder_open :: () {
 }
 
 finder_close :: () {
-    if finder.definition_search {
-        if finder.regex_search != finder.old_regex_search_value finder.regex_search = finder.old_regex_search_value;
-        finder.definition_search = false;
-    }
     activate_editors();
 }
 
@@ -144,15 +140,10 @@ finder_go_to_jai_definition_from_editor :: () {
         cursor := *editor.cursors[0];
         select_word(buffer, cursor);
         selected_text := get_selected_string(cursor, buffer);
-        if selected_text && selected_text != to_string(finder.input.text) && offset_to_real_line(buffer, cursor.pos) == offset_to_real_line(buffer, cursor.sel) {
-
+        if selected_text && offset_to_real_line(buffer, cursor.pos) == offset_to_real_line(buffer, cursor.sel) {
             jai_definition_text := tprint("%.*:.*:", selected_text);
             replace_text(*finder.input, jai_definition_text);
             reset_results();
-
-            finder.definition_search = true;
-            finder.old_regex_search_value = finder.regex_search;
-            if !finder.regex_search finder.regex_search = true;
 
             start_new_search(force = true, goto_definition = true);
         }
@@ -216,7 +207,8 @@ finder_update :: () {
             request.in_progress = false;
 
             if request.goto_definition && results.count == 1 {
-                finder_open_selected_result(.in_place);
+                finder_open_selected_result(.on_the_side);
+
             }
         }
     }
@@ -335,8 +327,11 @@ start_new_search :: (force := false, goto_definition := false) {
 
     request.case_sensitive  = case_sensitive;
     request.whole_word      = whole_word;
-    request.regex_search    = regex_search;
-    if regex_search {
+
+    if goto_definition request.regex_search = true;
+    else request.regex_search    = regex_search;
+
+    if request.regex_search {
         regex: re.Regexp;
 
         flags := BASE_REGEX_FLAGS;
@@ -595,8 +590,6 @@ Finder :: struct {
     case_sensitive: bool;
     case_sensitive_toggled_manually: bool;
     whole_word: bool;
-    definition_search: bool;
-    old_regex_search_value: bool;
     regex_search: bool;
     regex_is_valid: bool;
 
